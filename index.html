@@ -1,976 +1,329 @@
 <!DOCTYPE html>
-<html lang="th" class="light">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechZone - ร้านค้าอุปกรณ์ IT และสมาร์ทเกดเจ็ตออนไลน์</title>
-    <!-- Tailwind CSS CDN -->
+    <title>TechZone e-Store - ร้านค้าอุปกรณ์ไอทีออนไลน์</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f7ff',
-                            100: '#e0effe',
-                            500: '#2563eb',
-                            600: '#1d4ed8',
-                            700: '#1e40af',
-                            800: '#1e3a8a',
-                            900: '#172554',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Kanit', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Vue.js 3 CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <!-- FontAwesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Kanit -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <style>
-        body {
-            font-family: 'Kanit', sans-serif;
-        }
-        /* Hide scrollbar for clean UI in categories horizontal scroll */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        /* Custom Smooth Animations */
-        .fade-enter-active, .fade-leave-active {
-            transition: opacity 0.3s ease;
-        }
-        .fade-enter-from, .fade-leave-to {
-            opacity: 0;
-        }
+        body { font-family: 'Kanit', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
-    <div id="app" class="flex flex-col min-h-screen">
-
-        <!-- 1. NAVBAR / HEADER -->
-        <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 shadow-sm transition-all">
-            <!-- Top Announcement Bar -->
-            <div class="bg-gradient-to-r from-brand-600 to-indigo-600 text-white text-xs py-1.5 px-4 text-center font-medium">
-                <span>🔥 โปรโมชันต้อนรับเทอมใหม่! ใส่โค้ด <span class="bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded font-bold">TECH10</span> รับส่วนลดทันที 10% เมื่อช้อปขั้นต่ำ 1,000.-</span>
-            </div>
-
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-16 gap-4">
-                    
-                    <!-- Brand Logo -->
-                    <div class="flex items-center gap-3 cursor-pointer select-none" @click="resetFilters">
-                        <div class="w-10 h-10 bg-gradient-to-tr from-brand-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
-                            <i class="fa-solid fa-laptop-code text-xl"></i>
-                        </div>
-                        <div>
-                            <span class="text-xl font-extrabold bg-gradient-to-r from-brand-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">TechZone</span>
-                            <p class="text-[10px] text-slate-400 dark:text-slate-400 -mt-1 font-normal tracking-wide">IT & GADGET STORE</p>
-                        </div>
-                    </div>
-
-                    <!-- Instant Search Bar (Desktop) -->
-                    <div class="hidden md:flex flex-1 max-w-lg mx-6">
-                        <div class="relative w-full">
-                            <input type="text" v-model="searchQuery" placeholder="ค้นหาสินค้า เช่น iPhone, โน้ตบุ๊ก, หูฟัง..." 
-                                class="w-full pl-10 pr-10 py-2 text-sm bg-slate-100 dark:bg-slate-700 border-0 rounded-full focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-all">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-slate-400 text-sm"></i>
-                            <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3.5 top-2.5 text-slate-400 hover:text-slate-600 text-sm">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Actions Buttons -->
-                    <div class="flex items-center gap-2 sm:gap-3">
-                        
-                        <!-- Order Tracking Modal Trigger -->
-                        <button @click="showTrackingModal = true" class="px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition flex items-center gap-1.5 border border-slate-200 dark:border-slate-700">
-                            <i class="fa-solid fa-truck-fast text-brand-500 text-sm"></i>
-                            <span class="hidden sm:inline">ติดตามพัสดุ</span>
-                        </button>
-
-                        <!-- Dark/Light Mode Toggle -->
-                        <button @click="toggleDarkMode" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition">
-                            <i :class="isDark ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-slate-600'" class="text-base"></i>
-                        </button>
-
-                        <!-- Shopping Cart Button with Animated Badge -->
-                        <button @click="showCartDrawer = true" class="relative p-2.5 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-brand-500/25 transition flex items-center gap-2">
-                            <i class="fa-solid fa-cart-shopping text-sm"></i>
-                            <span class="text-xs font-bold hidden sm:inline">ตะกร้า</span>
-                            <span v-if="cartItemCount > 0" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold ring-2 ring-white dark:ring-slate-800 animate-pulse">
-                                {{ cartItemCount }}
-                            </span>
-                        </button>
+<body class="bg-slate-50 text-slate-800">
+    <div id="app">
+        <!-- Navigation Bar -->
+        <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <span class="bg-blue-600 text-white font-bold px-3 py-1 rounded-lg text-xl tracking-wider">TechZone</span>
+                    <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700 hidden sm:inline">e-Store</span>
+                </div>
+                
+                <!-- Search Box -->
+                <div class="flex-1 max-w-md mx-4">
+                    <div class="relative">
+                        <input type="text" v-model="searchQuery" placeholder="ค้นหาสินค้าไอที สมาร์ทโฟน แล็ปท็อป..." class="w-full bg-slate-800 text-white text-sm rounded-full pl-9 pr-4 py-2 border border-slate-700 focus:outline-none focus:border-blue-500">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
                     </div>
                 </div>
 
-                <!-- Mobile Search Bar -->
-                <div class="pb-3 md:hidden">
-                    <div class="relative w-full">
-                        <input type="text" v-model="searchQuery" placeholder="ค้นหาสินค้า..." 
-                            class="w-full pl-10 pr-10 py-2 text-sm bg-slate-100 dark:bg-slate-700 border-0 rounded-full focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-slate-100 placeholder-slate-400">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-slate-400 text-sm"></i>
-                        <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3.5 top-2.5 text-slate-400 text-sm">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
+                <div class="flex items-center space-x-3">
+                    <!-- ปุ่มเปิดติดตามพัสดุ -->
+                    <button @click="showTrackingModal = true" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-lg border border-slate-700 transition">
+                        <i class="fa-solid fa-truck-fast text-blue-400 mr-1"></i> ติดตามพัสดุ
+                    </button>
+
+                    <!-- ปุ่มลิงก์ไประบบหลังบ้าน Admin -->
+                    <a href="admin.html" target="_blank" class="text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition shadow-sm flex items-center space-x-1">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>Admin Panel</span>
+                    </a>
+
+                    <!-- ปุ่มตะกร้าสินค้า -->
+                    <button @click="showCartDrawer = true" class="relative p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition">
+                        <i class="fa-solid fa-cart-shopping text-lg text-blue-400"></i>
+                        <span v-if="cartCount > 0" class="absolute -top-1 -right-1 bg-rose-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                            {{ cartCount }}
+                        </span>
+                    </button>
                 </div>
             </div>
         </header>
 
-        <!-- MAIN CONTENT -->
-        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-
-            <!-- 2. HERO PROMOTIONAL BANNER -->
-            <div class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-slate-900 via-brand-900 to-indigo-950 text-white p-6 sm:p-10 shadow-2xl border border-slate-800">
-                <div class="absolute -right-10 -bottom-10 opacity-10 text-[12rem] pointer-events-none">
-                    <i class="fa-solid fa-microchip"></i>
-                </div>
-                <div class="relative z-10 max-w-2xl">
-                    <span class="px-3 py-1 bg-brand-500/30 border border-brand-400/30 text-brand-300 text-xs font-bold rounded-full uppercase tracking-wider mb-3 inline-flex items-center gap-1.5">
-                        <i class="fa-solid fa-bolt text-amber-400"></i> New Arrival 2026
-                    </span>
-                    <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight mb-3 leading-tight">
-                        สัมผัสประสบการณ์เทคโนโลยีอนาคตก่อนใครที่ TechZone
-                    </h1>
-                    <p class="text-slate-300 text-sm sm:text-base mb-6 font-light">
-                        รวมสินค้า IT สมาร์ทโฟน โน้ตบุ๊ก และเกมมิ่งเกียร์แบรนด์แท้ 100% พร้อมบริการรับประกันศูนย์ และจัดส่งด่วนทั่วประเทศ
-                    </p>
-                    <div class="flex flex-wrap gap-3 items-center">
-                        <button @click="applyCouponCode('TECH10')" class="bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-amber-500/20 hover:from-amber-500 hover:to-amber-600 transition text-sm flex items-center gap-2">
-                            <i class="fa-solid fa-ticket"></i> เก็บโค้ดส่วนลด TECH10
-                        </button>
-                        <span class="text-xs text-slate-400">* ลดเพิ่ม 10% ทุกคำสั่งซื้อ</span>
-                    </div>
+        <!-- Main Banner -->
+        <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white py-10 px-4">
+            <div class="max-w-7xl mx-auto text-center">
+                <h1 class="text-3xl md:text-4xl font-extrabold mb-2">อุปกรณ์ไอทีและแก็ดเจ็ตสุดล้ำ</h1>
+                <p class="text-slate-300 text-sm md:text-base mb-4">รับส่วนลดพิเศษ 10% เมื่อใส่โค้ดส่วนลด <span class="bg-amber-400 text-slate-900 font-bold px-2 py-0.5 rounded">TECH10</span></p>
+                
+                <!-- Category Buttons -->
+                <div class="flex justify-center flex-wrap gap-2 mt-4">
+                    <button @click="selectedCategory = 'all'" :class="selectedCategory === 'all' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-4 py-1.5 rounded-full text-xs font-medium transition">ทั้งหมด</button>
+                    <button @click="selectedCategory = 'smartphone'" :class="selectedCategory === 'smartphone' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-4 py-1.5 rounded-full text-xs font-medium transition">สมาร์ทโฟน</button>
+                    <button @click="selectedCategory = 'laptop'" :class="selectedCategory === 'laptop' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-4 py-1.5 rounded-full text-xs font-medium transition">แล็ปท็อป</button>
+                    <button @click="selectedCategory = 'audio'" :class="selectedCategory === 'audio' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-4 py-1.5 rounded-full text-xs font-medium transition">หูฟัง / ลำโพง</button>
                 </div>
             </div>
+        </div>
 
-            <!-- CATEGORY FILTERS & SORTING -->
-            <div class="space-y-4">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                        <i class="fa-solid fa-boxes-stacked text-brand-500"></i> หมวดหมู่สินค้า
-                    </h2>
-
-                    <!-- Price Sorting Dropdown -->
-                    <div class="flex items-center gap-2 text-xs">
-                        <span class="text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap">เรียงตาม:</span>
-                        <select v-model="sortBy" class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:ring-2 focus:ring-brand-500 outline-none">
-                            <option value="featured">สินค้าแนะนำ</option>
-                            <option value="price-low">ราคา: ต่ำไปสูง</option>
-                            <option value="price-high">ราคา: สูงไปต่ำ</option>
-                            <option value="rating">คะแนนรีวิวสูงสุด</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Horizontal Category Scroll -->
-                <div class="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-                    <button v-for="cat in categories" :key="cat.id"
-                        @click="selectedCategory = cat.id"
-                        :class="selectedCategory === cat.id ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-500/20 font-bold' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 font-medium'"
-                        class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm whitespace-nowrap transition-all duration-200 flex items-center gap-2 border border-slate-200 dark:border-slate-700/80">
-                        <i :class="cat.icon"></i>
-                        {{ cat.name }}
-                    </button>
-                </div>
-            </div>
-
-            <!-- 3. PRODUCT CATALOG GRID -->
-            <div>
-                <div v-if="filteredProducts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <div v-for="product in filteredProducts" :key="product.id" 
-                        class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/80 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group">
-                        
-                        <!-- Product Image Container -->
-                        <div class="relative pt-[75%] overflow-hidden bg-slate-100 dark:bg-slate-900 cursor-pointer" @click="openQuickView(product)">
-                            <img :src="product.image" :alt="product.name" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                            
-                            <!-- Badges -->
-                            <div class="absolute top-2 left-2 flex flex-col gap-1">
-                                <span v-if="product.originalPrice" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                                    ลด {{ Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) }}%
-                                </span>
-                                <span v-if="product.stock <= 5 && product.stock > 0" class="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                                    เหลือ {{ product.stock }} ชิ้นสุดท้าย
-                                </span>
-                                <span v-if="product.stock === 0" class="bg-slate-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                                    สินค้าหมดชั่วคราว
-                                </span>
-                            </div>
-
-                            <!-- Quick View Overlay Button -->
-                            <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <span class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-xs font-bold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5 transform translate-y-2 group-hover:translate-y-0 transition-transform">
-                                    <i class="fa-solid fa-eye text-brand-500"></i> ดูรายละเอียด
-                                </span>
-                            </div>
+        <!-- Product Grid -->
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div v-for="product in filteredProducts" :key="product.id" class="bg-white rounded-2xl shadow-sm hover:shadow-md transition border border-slate-200 overflow-hidden flex flex-col">
+                    <img :src="product.image" class="w-full h-48 object-cover">
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider">{{ product.category }}</span>
+                            <h3 class="font-bold text-slate-800 mt-1 text-base leading-snug">{{ product.title }}</h3>
+                            <p class="text-xs text-slate-500 mt-1">สต็อกคงเหลือ: {{ product.stock }} ชิ้น</p>
                         </div>
-
-                        <!-- Product Information -->
-                        <div class="p-4 flex-1 flex flex-col justify-between">
-                            <div>
-                                <div class="text-[11px] text-brand-600 dark:text-brand-400 font-semibold mb-1 uppercase tracking-wider">{{ getCategoryName(product.categoryId) }}</div>
-                                <h3 @click="openQuickView(product)" class="font-bold text-slate-800 dark:text-slate-100 line-clamp-2 hover:text-brand-600 dark:hover:text-brand-400 cursor-pointer transition mb-1 text-sm sm:text-base leading-snug">
-                                    {{ product.name }}
-                                </h3>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-3 font-light">{{ product.description }}</p>
-                            </div>
-
-                            <div>
-                                <!-- Rating Stars & Stock Status -->
-                                <div class="flex items-center justify-between text-xs mb-3">
-                                    <div class="flex items-center text-amber-400 gap-1">
-                                        <i class="fa-solid fa-star text-[11px]"></i>
-                                        <span class="font-bold text-slate-700 dark:text-slate-200">{{ product.rating }}</span>
-                                        <span class="text-slate-400 text-[10px]">({{ product.reviewsCount }})</span>
-                                    </div>
-                                    <span class="text-[11px]" :class="product.stock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'">
-                                        <i class="fa-solid fa-circle text-[6px] mr-1"></i>{{ product.stock > 0 ? 'มีสินค้าพร้อมส่ง' : 'สินค้าหมด' }}
-                                    </span>
-                                </div>
-
-                                <!-- Price & Action -->
-                                <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-700/80">
-                                    <div>
-                                        <span v-if="product.originalPrice" class="text-xs text-slate-400 block line-through">฿{{ formatPrice(product.originalPrice) }}</span>
-                                        <span class="text-base sm:text-lg font-extrabold text-brand-600 dark:text-brand-400">฿{{ formatPrice(product.price) }}</span>
-                                    </div>
-                                    <button @click="addToCart(product)" :disabled="product.stock === 0"
-                                        :class="product.stock === 0 ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed' : 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-md shadow-brand-500/20 active:scale-95'"
-                                        class="p-2.5 rounded-xl transition flex items-center justify-center font-medium">
-                                        <i class="fa-solid fa-cart-plus text-sm"></i>
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <span class="text-lg font-bold text-slate-900">฿{{ formatNumber(product.price) }}</span>
+                            <button @click="addToCart(product)" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center space-x-1">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>เพิ่มลงตะกร้า</span>
+                            </button>
                         </div>
                     </div>
                 </div>
-
-                <!-- Empty State -->
-                <div v-else class="text-center py-16 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 p-8 shadow-sm">
-                    <div class="w-16 h-16 bg-slate-100 dark:bg-slate-700 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-                        <i class="fa-solid fa-box-open"></i>
-                    </div>
-                    <h3 class="text-base font-bold text-slate-700 dark:text-slate-200">ไม่พบสินค้าที่คุณกำลังหา</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">ลองค้นหาด้วยคำอื่น หรือเลือกดูหมวดหมู่อื่นๆ</p>
-                    <button @click="resetFilters" class="mt-4 px-4 py-2 bg-brand-600 text-white text-xs font-bold rounded-xl hover:bg-brand-700 transition">
-                        ล้างการค้นหาทั้งหมด
-                    </button>
-                </div>
             </div>
-
         </main>
 
-        <!-- QUICK VIEW PRODUCT MODAL -->
-        <div v-if="selectedQuickView" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-            <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row max-h-[90vh] my-auto">
-                <div class="md:w-1/2 bg-slate-100 dark:bg-slate-900 relative">
-                    <img :src="selectedQuickView.image" :alt="selectedQuickView.name" class="w-full h-full object-cover">
-                    <button @click="selectedQuickView = null" class="absolute top-3 left-3 md:hidden p-2 bg-slate-900/60 text-white rounded-full w-8 h-8 flex items-center justify-center">
-                        <i class="fa-solid fa-xmark"></i>
+        <!-- Cart Drawer (สไลด์ตะกร้าสินค้าด้านข้าง) -->
+        <div v-if="showCartDrawer" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-end">
+            <div class="bg-white w-full max-w-md h-full shadow-2xl flex flex-col">
+                <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
+                    <h3 class="font-bold text-lg"><i class="fa-solid fa-cart-shopping text-blue-400 mr-2"></i> ตะกร้าสินค้า</h3>
+                    <button @click="showCartDrawer = false" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                    <div v-for="item in cart" :key="item.id" class="flex items-center space-x-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <img :src="item.image" class="w-14 h-14 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-sm text-slate-800">{{ item.title }}</h4>
+                            <div class="text-xs font-semibold text-blue-600 mt-0.5">฿{{ formatNumber(item.price) }}</div>
+                            <div class="flex items-center space-x-2 mt-2">
+                                <button @click="updateQty(item, -1)" class="w-6 h-6 bg-slate-200 hover:bg-slate-300 rounded text-xs font-bold">-</button>
+                                <span class="text-xs font-bold px-1">{{ item.quantity }}</span>
+                                <button @click="updateQty(item, 1)" class="w-6 h-6 bg-slate-200 hover:bg-slate-300 rounded text-xs font-bold">+</button>
+                            </div>
+                        </div>
+                        <button @click="removeFromCart(item.id)" class="text-rose-500 hover:text-rose-700 text-sm"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    <div v-if="cart.length === 0" class="text-center py-12 text-slate-400">ยังไม่มีสินค้าในตะกร้า</div>
+                </div>
+
+                <!-- Checkout Summary -->
+                <div v-if="cart.length > 0" class="p-4 border-t border-slate-200 bg-slate-50">
+                    <!-- โค้ดส่วนลด -->
+                    <div class="flex space-x-2 mb-3">
+                        <input type="text" v-model="discountCode" placeholder="ใส่รหัสส่วนลด (TECH10)" class="flex-1 border border-slate-300 rounded-lg px-3 py-1.5 text-xs">
+                        <button @click="applyDiscount" class="bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-slate-700">ใช้โค้ด</button>
+                    </div>
+
+                    <div class="space-y-1 text-xs text-slate-600 mb-3">
+                        <div class="flex justify-between"><span>ราคารวม:</span><span>฿{{ formatNumber(cartSubtotal) }}</span></div>
+                        <div v-if="discountAmount > 0" class="flex justify-between text-emerald-600 font-semibold"><span>ส่วนลด (10%):</span><span>-฿{{ formatNumber(discountAmount) }}</span></div>
+                        <div class="flex justify-between font-bold text-sm text-slate-900 border-t pt-2"><span>ยอดสุทธิ:</span><span class="text-blue-600">฿{{ formatNumber(cartTotal) }}</span></div>
+                    </div>
+
+                    <button @click="openCheckoutModal" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
+                        ดำเนินการสั่งซื้อ (PromptPay QR)
                     </button>
                 </div>
-                <div class="md:w-1/2 p-6 flex flex-col justify-between overflow-y-auto">
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-start">
-                            <span class="text-xs font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider">{{ getCategoryName(selectedQuickView.categoryId) }}</span>
-                            <button @click="selectedQuickView = null" class="hidden md:block text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-                        </div>
-                        <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 leading-snug">{{ selectedQuickView.name }}</h2>
-                        
-                        <div class="flex items-center gap-2">
-                            <div class="flex text-amber-400 text-xs">
-                                <i v-for="n in 5" :key="n" class="fa-solid fa-star" :class="n <= Math.round(selectedQuickView.rating) ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600'"></i>
-                            </div>
-                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ selectedQuickView.rating }}</span>
-                            <span class="text-xs text-slate-400">({{ selectedQuickView.reviewsCount }} รีวิวจากผู้ซื้อจริง)</span>
-                        </div>
-
-                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-light">{{ selectedQuickView.description }}</p>
-
-                        <!-- Key Features Checklist -->
-                        <div class="p-3 bg-slate-50 dark:bg-slate-700/40 rounded-2xl space-y-2 text-xs text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700">
-                            <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> สินค้าแท้ 100% ประกันศูนย์ไทย</div>
-                            <div class="flex items-center gap-2"><i class="fa-solid fa-truck-fast text-brand-500"></i> จัดส่งรวดเร็วภายใน 1-2 วันทำการ</div>
-                            <div class="flex items-center gap-2"><i class="fa-solid fa-arrow-rotate-left text-indigo-500"></i> รับเปลี่ยนคืนภายใน 7 วันตามเงื่อนไข</div>
-                        </div>
-                    </div>
-
-                    <div class="pt-6 mt-6 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between gap-4">
-                        <div>
-                            <span class="text-xs text-slate-400 block">ราคาพิเศษสุทธิ</span>
-                            <span class="text-xl sm:text-2xl font-extrabold text-brand-600 dark:text-brand-400">฿{{ formatPrice(selectedQuickView.price) }}</span>
-                        </div>
-                        <button @click="addToCart(selectedQuickView); selectedQuickView = null" :disabled="selectedQuickView.stock === 0"
-                            class="px-5 py-2.5 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center gap-2">
-                            <i class="fa-solid fa-cart-plus"></i> เพิ่มลงตะกร้า
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
 
-        <!-- 4. CART DRAWER MODAL -->
-        <div v-if="showCartDrawer" class="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-sm transition-opacity">
-            <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
-                <div class="w-screen max-w-md bg-white dark:bg-slate-800 shadow-2xl flex flex-col">
-                    
-                    <!-- Drawer Header -->
-                    <div class="p-4 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                        <h3 class="font-bold text-base text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                            <i class="fa-solid fa-bag-shopping text-brand-500"></i> ตะกร้าสินค้าของคุณ ({{ cartItemCount }})
-                        </h3>
-                        <button @click="showCartDrawer = false" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
-                    </div>
-
-                    <!-- Cart Item List -->
-                    <div class="flex-1 p-4 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700">
-                        <div v-if="cart.length === 0" class="text-center py-16 space-y-3">
-                            <i class="fa-solid fa-cart-flatbed text-5xl text-slate-300 dark:text-slate-600"></i>
-                            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">ไม่มีสินค้าในตะกร้า</p>
-                            <button @click="showCartDrawer = false" class="text-xs text-brand-600 font-bold hover:underline">เลือกซื้อสินค้าเลย</button>
-                        </div>
-
-                        <div v-for="item in cart" :key="item.id" class="py-4 flex gap-3">
-                            <img :src="item.image" class="w-16 h-16 rounded-xl object-cover bg-slate-100 border border-slate-200 dark:border-slate-700">
-                            <div class="flex-1">
-                                <h4 class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 line-clamp-1">{{ item.name }}</h4>
-                                <p class="text-xs text-brand-600 dark:text-brand-400 font-bold mt-0.5">฿{{ formatPrice(item.price) }}</p>
-                                
-                                <div class="flex items-center justify-between mt-2">
-                                    <div class="flex items-center border border-slate-200 dark:border-slate-600 rounded-lg">
-                                        <button @click="updateCartQuantity(item, -1)" class="px-2.5 py-0.5 text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-l-lg">-</button>
-                                        <span class="px-2 text-xs font-bold">{{ item.quantity }}</span>
-                                        <button @click="updateCartQuantity(item, 1)" class="px-2.5 py-0.5 text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-r-lg">+</button>
-                                    </div>
-                                    <button @click="removeFromCart(item.id)" class="text-xs text-red-500 hover:underline flex items-center gap-1">
-                                        <i class="fa-solid fa-trash-can text-[10px]"></i> ลบ
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Cart Summary & Coupon Code -->
-                    <div v-if="cart.length > 0" class="p-4 bg-slate-50 dark:bg-slate-700/30 border-t border-slate-200 dark:border-slate-700 space-y-3">
-                        <!-- Coupon Form -->
-                        <div class="flex gap-2">
-                            <input type="text" v-model="inputCoupon" placeholder="ใส่โค้ดส่วนลด (เช่น TECH10)" class="flex-1 px-3 py-1.5 text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-100 uppercase focus:ring-1 focus:ring-brand-500 outline-none">
-                            <button @click="applyCouponCode(inputCoupon)" class="px-3 py-1.5 bg-slate-800 dark:bg-slate-600 text-white text-xs font-bold rounded-xl hover:bg-slate-700 transition">ใช้โค้ด</button>
-                        </div>
-                        <p v-if="couponMessage" :class="appliedCoupon ? 'text-emerald-600' : 'text-red-500'" class="text-[11px] font-medium">{{ couponMessage }}</p>
-
-                        <!-- Price Breakdown -->
-                        <div class="space-y-1.5 text-xs">
-                            <div class="flex justify-between text-slate-600 dark:text-slate-300">
-                                <span>ราคารวมสินค้า</span>
-                                <span>฿{{ formatPrice(cartSubtotal) }}</span>
-                            </div>
-                            <div class="flex justify-between text-slate-600 dark:text-slate-300">
-                                <span>ค่าจัดส่ง (เหมาจ่าย)</span>
-                                <span>฿{{ shippingFee }}</span>
-                            </div>
-                            <div v-if="discountAmount > 0" class="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold">
-                                <span>ส่วนลดโค้ด ({{ appliedCoupon }})</span>
-                                <span>-฿{{ formatPrice(discountAmount) }}</span>
-                            </div>
-                            <div class="flex justify-between text-sm font-extrabold pt-2 border-t border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100">
-                                <span>ยอดชำระสุทธิ</span>
-                                <span class="text-brand-600 dark:text-brand-400">฿{{ formatPrice(cartGrandTotal) }}</span>
-                            </div>
-                        </div>
-
-                        <button @click="goToCheckout" class="w-full py-3 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center justify-center gap-2">
-                            ดำเนินการสั่งซื้อ <i class="fa-solid fa-arrow-right text-xs"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- CHECKOUT & PAYMENT MODAL -->
-        <div v-if="showCheckoutModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-            <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-xl w-full p-6 my-8 shadow-2xl border border-slate-200 dark:border-slate-700 space-y-5">
-                <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-3">
-                    <h3 class="font-bold text-base sm:text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                        <i class="fa-solid fa-credit-card text-brand-500"></i> ชำระเงินและยืนยันการสั่งซื้อ
-                    </h3>
-                    <button @click="showCheckoutModal = false" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-                </div>
-
-                <!-- Step 1: Shipping Form -->
+        <!-- Checkout Form Modal -->
+        <div v-if="showCheckoutModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                <h3 class="text-lg font-bold text-slate-800 mb-4"><i class="fa-solid fa-credit-card text-blue-600 mr-2"></i> กรอกข้อมูลจัดส่งและชำระเงิน</h3>
                 <div class="space-y-3">
-                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">1. ข้อมูลจัดส่งสินค้า</h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <input type="text" v-model="checkoutForm.name" placeholder="ชื่อ-นามสกุล ผู้รับ *" class="px-3 py-2 text-xs bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-brand-500 outline-none">
-                        <input type="text" v-model="checkoutForm.phone" placeholder="เบอร์โทรศัพท์ *" class="px-3 py-2 text-xs bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-brand-500 outline-none">
-                    </div>
-                    <textarea v-model="checkoutForm.address" placeholder="ที่อยู่จัดส่งโดยละเอียด (บ้านเลขที่, ถนน, แขวง/ตำบล, เขต/อำเภอ, จังหวัด, รหัสไปรษณีย์) *" rows="2" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-brand-500 outline-none"></textarea>
-                </div>
-
-                <!-- Step 2: Payment Method Selection -->
-                <div class="space-y-3">
-                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">2. วิธีการชำระเงิน</h4>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button @click="checkoutForm.paymentMethod = 'promptpay'" 
-                            :class="checkoutForm.paymentMethod === 'promptpay' ? 'border-brand-600 bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300 font-bold' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'"
-                            class="p-3 border rounded-2xl text-center flex flex-col items-center gap-1.5 text-xs transition">
-                            <i class="fa-solid fa-qrcode text-lg"></i> PromptPay QR
-                        </button>
-                        <button @click="checkoutForm.paymentMethod = 'bank'" 
-                            :class="checkoutForm.paymentMethod === 'bank' ? 'border-brand-600 bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300 font-bold' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'"
-                            class="p-3 border rounded-2xl text-center flex flex-col items-center gap-1.5 text-xs transition">
-                            <i class="fa-solid fa-building-columns text-lg"></i> โอนธนาคาร
-                        </button>
-                        <button @click="checkoutForm.paymentMethod = 'cod'" 
-                            :class="checkoutForm.paymentMethod === 'cod' ? 'border-brand-600 bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300 font-bold' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'"
-                            class="p-3 border rounded-2xl text-center flex flex-col items-center gap-1.5 text-xs transition">
-                            <i class="fa-solid fa-hand-holding-dollar text-lg"></i> เก็บปลายทาง
-                        </button>
-                    </div>
-
-                    <!-- PromptPay QR Code Display -->
-                    <div v-if="checkoutForm.paymentMethod === 'promptpay'" class="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl text-center space-y-2 border border-slate-100 dark:border-slate-700">
-                        <p class="text-xs font-bold text-slate-700 dark:text-slate-300">สแกน QR Code ด้วยแอปพลิเคชันธนาคารเพื่อชำระเงิน</p>
-                        <div class="w-36 h-36 bg-white mx-auto p-2 border rounded-xl shadow-sm flex items-center justify-center">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=TechZonePromptPayDemo" alt="PromptPay QR">
-                        </div>
-                        <p class="text-xs text-brand-600 font-bold">ยอดที่ต้องชำระ: ฿{{ formatPrice(cartGrandTotal) }}</p>
-                    </div>
-
-                    <!-- Bank Transfer Details -->
-                    <div v-if="checkoutForm.paymentMethod === 'bank'" class="p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl text-xs space-y-1 border border-slate-100 dark:border-slate-700">
-                        <p class="font-bold text-slate-800 dark:text-slate-200">ธนาคารกสิกรไทย (KBANK)</p>
-                        <p class="text-slate-600 dark:text-slate-300">ชื่อบัญชี: บจก. เทคโซน ไอที สโตร์</p>
-                        <p class="font-mono text-brand-600 font-bold text-sm">เลขที่บัญชี: 123-4-56789-0</p>
-                    </div>
-                </div>
-
-                <!-- Checkout Footer Actions -->
-                <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <div>
-                        <span class="text-xs text-slate-400 block">ยอดรวมสุทธิ</span>
-                        <p class="text-lg font-extrabold text-brand-600 dark:text-brand-400">฿{{ formatPrice(cartGrandTotal) }}</p>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">ชื่อ-นามสกุล</label>
+                        <input type="text" v-model="checkoutForm.name" placeholder="นาย สมชาย ใจดี" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
                     </div>
-                    <button @click="confirmOrder" :disabled="!checkoutForm.name || !checkoutForm.phone || !checkoutForm.address"
-                        :class="(!checkoutForm.name || !checkoutForm.phone || !checkoutForm.address) ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-lg shadow-brand-500/20'"
-                        class="px-6 py-2.5 font-bold text-xs rounded-xl transition flex items-center gap-2">
-                        <i class="fa-solid fa-check"></i> ยืนยันคำสั่งซื้อ
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">เบอร์โทรศัพท์</label>
+                        <input type="text" v-model="checkoutForm.phone" placeholder="081-234-5678" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">ที่อยู่จัดส่ง</label>
+                        <textarea v-model="checkoutForm.address" rows="2" placeholder="ที่อยู่จัดส่งโดยละเอียด" class="w-full border border-slate-300 rounded-lg p-2 text-sm"></textarea>
+                    </div>
+
+                    <!-- PromptPay QR Mockup -->
+                    <div class="bg-blue-50 border border-blue-200 p-3 rounded-xl text-center">
+                        <div class="text-xs font-bold text-blue-900 mb-1">สแกนชำระเงินผ่าน PromptPay QR Code</div>
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=TechZonePromptPay" class="w-32 h-32 mx-auto rounded-lg border border-white shadow-sm">
+                        <div class="text-sm font-extrabold text-blue-700 mt-2">ยอดชำระ: ฿{{ formatNumber(cartTotal) }}</div>
+                    </div>
+                </div>
+
+                <div class="mt-5 flex justify-end space-x-2">
+                    <button @click="showCheckoutModal = false" class="px-4 py-2 text-slate-500 hover:text-slate-700 text-sm">ยกเลิก</button>
+                    <!-- ปุ่มกดยืนยันการสั่งซื้อที่จะบันทึกออเดอร์ส่งตรงไป Admin.html -->
+                    <button @click="confirmOrder" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-md">
+                        ยืนยันการชำระเงิน
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- ORDER SUCCESS CONFIRMATION MODAL -->
-        <div v-if="completedOrder" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-            <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 text-center space-y-4">
-                <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-500 rounded-full flex items-center justify-center mx-auto text-3xl">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>
-                <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">สั่งซื้อสินค้าสำเร็จ!</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400">ขอบคุณที่เลือกช้อปกับ TechZone ระบบได้รับคำสั่งซื้อของคุณเรียบร้อยแล้ว</p>
-                
-                <div class="p-4 bg-slate-50 dark:bg-slate-700/40 rounded-2xl text-left space-y-2 text-xs border border-slate-100 dark:border-slate-700">
-                    <div class="flex justify-between border-b pb-1.5 border-slate-200 dark:border-slate-600">
-                        <span class="text-slate-400">รหัสคำสั่งซื้อ:</span>
-                        <span class="font-mono font-bold text-brand-600 dark:text-brand-400">#{{ completedOrder.id }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-400">ผู้รับ:</span>
-                        <span class="font-medium">{{ completedOrder.customer.name }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-400">ยอดชำระสุทธิ:</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">฿{{ formatPrice(completedOrder.total) }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-400">สถานะ:</span>
-                        <span class="text-amber-500 font-bold">กำลังเตรียมพัสดุ</span>
-                    </div>
-                </div>
-
-                <div class="pt-2 flex gap-2">
-                    <button @click="trackNewOrder(completedOrder.id)" class="flex-1 py-2.5 bg-brand-600 text-white text-xs font-bold rounded-xl hover:bg-brand-700 transition">
-                        ติดตามสถานะพัสดุ
-                    </button>
-                    <button @click="completedOrder = null" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl hover:bg-slate-200 transition">
-                        ปิดหน้าต่าง
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 5. ORDER TRACKING MODAL -->
-        <div v-if="showTrackingModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-            <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 space-y-4">
-                <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-3">
-                    <h3 class="font-bold text-base text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                        <i class="fa-solid fa-magnifying-glass-location text-brand-500"></i> ติดตามสถานะคำสั่งซื้อ
-                    </h3>
+        <!-- Tracking Modal -->
+        <div v-if="showTrackingModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-truck-fast text-blue-600 mr-2"></i> ติดตามพัสดุ</h3>
                     <button @click="showTrackingModal = false" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-
-                <div class="flex gap-2">
-                    <input type="text" v-model="searchOrderId" placeholder="กรอก Order ID (เช่น TZ1001)" class="flex-1 px-3 py-2 text-xs bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-100 font-mono focus:ring-1 focus:ring-brand-500 outline-none">
-                    <button @click="searchOrderTracking" class="px-4 py-2 bg-brand-600 text-white text-xs font-bold rounded-xl hover:bg-brand-700 transition">ค้นหา</button>
+                <div class="flex space-x-2 mb-4">
+                    <input type="text" v-model="searchOrderId" placeholder="กรอก Order ID เช่น #TZ1001" class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    <button @click="trackOrder" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700">ค้นหา</button>
                 </div>
 
-                <div v-if="searchedOrder" class="p-4 bg-slate-50 dark:bg-slate-700/40 rounded-2xl space-y-4 text-xs border border-slate-100 dark:border-slate-700">
-                    <div class="flex justify-between font-bold border-b pb-2 border-slate-200 dark:border-slate-600">
-                        <span>ออเดอร์ #{{ searchedOrder.id }}</span>
-                        <span class="text-brand-600 dark:text-brand-400">{{ searchedOrder.status }}</span>
-                    </div>
-
-                    <!-- Logistics Timeline Tracker -->
-                    <div class="py-2 space-y-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></div>
-                            <span class="text-slate-700 dark:text-slate-200 font-medium">ยืนยันคำสั่งซื้อสำเร็จ</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-box"></i></div>
-                            <span class="text-slate-700 dark:text-slate-200 font-medium">กำลังเตรียมจัดส่งพัสดุ</span>
-                        </div>
-                        <div class="flex items-center gap-3 opacity-50">
-                            <div class="w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-600 text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-truck"></i></div>
-                            <span class="text-slate-500 dark:text-slate-400">บริษัทขนส่งรับพัสดุเรียบร้อย</span>
-                        </div>
-                        <div class="flex items-center gap-3 opacity-50">
-                            <div class="w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-600 text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-house-chimney"></i></div>
-                            <span class="text-slate-500 dark:text-slate-400">จัดส่งพัสดุสำเร็จ</span>
-                        </div>
-                    </div>
-
-                    <p class="text-[11px] text-slate-500 pt-2 border-t border-slate-200 dark:border-slate-600">
-                        เลขพัสดุ: <span class="font-mono font-bold text-brand-600">{{ searchedOrder.trackingNumber || 'อยู่ในระหว่างออกเลขพัสดุ' }}</span>
-                    </p>
-                </div>
-                <div v-else-if="hasSearched" class="text-center py-4 text-xs text-red-500">
-                    ไม่พบข้อมูลคำสั่งซื้อโปรดตรวจสอบ Order ID อีกครั้ง
+                <div v-if="trackedResult" class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="text-xs text-slate-500">หมายเลขออเดอร์: <span class="font-bold text-slate-800">{{ trackedResult.id }}</span></div>
+                    <div class="text-xs text-slate-500 mt-1">สถานะ: <span class="font-bold text-emerald-600">{{ trackedResult.status }}</span></div>
+                    <div v-if="trackedResult.tracking" class="text-xs text-slate-500 mt-1">เลขพัสดุ: <span class="font-bold text-blue-600">{{ trackedResult.tracking }}</span></div>
                 </div>
             </div>
         </div>
-
-        <!-- 6. LIVE CHAT CUSTOMER SERVICE WIDGET -->
-        <div class="fixed bottom-5 right-5 z-40">
-            <button @click="showChat = !showChat" class="w-13 h-13 p-3.5 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition-all duration-300 hover:scale-110">
-                <i :class="showChat ? 'fa-solid fa-xmark' : 'fa-solid fa-comments'"></i>
-            </button>
-
-            <!-- Chat Box Popup -->
-            <div v-if="showChat" class="absolute bottom-16 right-0 w-80 sm:w-96 bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col h-[420px]">
-                <div class="p-4 bg-gradient-to-r from-brand-600 to-indigo-600 text-white flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                            <i class="fa-solid fa-headset text-sm"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-xs">ฝ่ายบริการลูกค้า TechZone</h4>
-                            <p class="text-[10px] text-brand-100">ตอบกลับอัตโนมัติ 24 ชม.</p>
-                        </div>
-                    </div>
-                    <button @click="showChat = false" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-
-                <div class="flex-1 p-3 overflow-y-auto space-y-3 bg-slate-50 dark:bg-slate-900/50">
-                    <div v-for="(msg, idx) in chatMessages" :key="idx" 
-                        :class="msg.sender === 'user' ? 'justify-end' : 'justify-start'" class="flex">
-                        <div :class="msg.sender === 'user' ? 'bg-brand-600 text-white rounded-tr-none' : 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-tl-none border border-slate-200 dark:border-slate-600'"
-                            class="max-w-[80%] p-2.5 rounded-2xl text-xs shadow-sm">
-                            <p>{{ msg.text }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-2.5 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex gap-2">
-                    <input type="text" v-model="newChatMessage" @keyup.enter="sendChatMessage" placeholder="พิมพ์ข้อความ..." 
-                        class="flex-1 px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-700 rounded-xl border-0 focus:ring-1 focus:ring-brand-500 text-slate-900 dark:text-slate-100">
-                    <button @click="sendChatMessage" class="px-3 py-1.5 bg-brand-600 text-white rounded-xl text-xs hover:bg-brand-700">
-                        <i class="fa-solid fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 7. FOOTER -->
-        <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12 py-10">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 text-xs text-slate-500 dark:text-slate-400">
-                <div class="space-y-3">
-                    <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">TZ</div>
-                        <span class="font-bold text-slate-800 dark:text-slate-100 text-sm">TechZone e-Store</span>
-                    </div>
-                    <p class="leading-relaxed">ร้านค้าออนไลน์จำหน่ายอุปกรณ์ IT สมาร์ทโฟน โน้ตบุ๊ก และแกดเจ็ตคุณภาพสูงพร้อมการรับประกันศูนย์</p>
-                </div>
-
-                <div>
-                    <h5 class="font-bold text-slate-800 dark:text-slate-200 mb-3 text-xs uppercase tracking-wider">บริการลูกค้า</h5>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="hover:underline">วิธีสั่งซื้อสินค้า</a></li>
-                        <li><a href="#" class="hover:underline">ช่องทางการชำระเงิน</a></li>
-                        <li><a href="#" class="hover:underline">ตรวจสอบสถานะการจัดส่ง</a></li>
-                        <li><a href="#" class="hover:underline">นโยบายการรับประกันสินค้า</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h5 class="font-bold text-slate-800 dark:text-slate-200 mb-3 text-xs uppercase tracking-wider">การชำระเงินที่รองรับ</h5>
-                    <div class="flex flex-wrap gap-2 text-base text-slate-600 dark:text-slate-300">
-                        <span class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg"><i class="fa-solid fa-qrcode"></i></span>
-                        <span class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg"><i class="fa-solid fa-building-columns"></i></span>
-                        <span class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg"><i class="fa-solid fa-credit-card"></i></span>
-                        <span class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-                    </div>
-                </div>
-
-                <div>
-                    <h5 class="font-bold text-slate-800 dark:text-slate-200 mb-3 text-xs uppercase tracking-wider">เกี่ยวกับโครงงาน</h5>
-                    <p class="leading-relaxed">นำเสนอผลงานวิชา การพัฒนาระบบพาณิชย์อิเล็กทรอนิกส์ (31910-2027)</p>
-                    <p class="mt-2 text-[10px] text-slate-400">© 2026 TechZone Storefront. All rights reserved.</p>
-                </div>
-            </div>
-        </footer>
-
     </div>
 
     <script>
-        const { createApp, ref, computed } = Vue;
+        const { createApp } = Vue;
 
         createApp({
-            setup() {
-                const isDark = ref(false);
-                const searchQuery = ref('');
-                const selectedCategory = ref('all');
-                const sortBy = ref('featured');
-
-                // Modals
-                const showCartDrawer = ref(false);
-                const showCheckoutModal = ref(false);
-                const showTrackingModal = ref(false);
-                const selectedQuickView = ref(null);
-                const completedOrder = ref(null);
-
-                // Categories Data
-                const categories = ref([
-                    { id: 'all', name: 'ทั้งหมด', icon: 'fa-solid fa-border-all' },
-                    { id: 'phone', name: 'สมาร์ทโฟน', icon: 'fa-solid fa-mobile-screen' },
-                    { id: 'laptop', name: 'แล็ปท็อป', icon: 'fa-solid fa-laptop' },
-                    { id: 'gadget', name: 'Gadgets', icon: 'fa-solid fa-clock' },
-                    { id: 'accessory', name: 'อุปกรณ์เสริม', icon: 'fa-solid fa-headphones' }
-                ]);
-
-                // Mock Products Catalog
-                const products = ref([
-                    {
-                        id: 'P01',
-                        name: 'iPhone 15 Pro Max 256GB Natural Titanium',
-                        categoryId: 'phone',
-                        price: 44900,
-                        originalPrice: 48900,
-                        stock: 6,
-                        rating: 4.9,
-                        reviewsCount: 128,
-                        image: 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500&q=80',
-                        description: 'สมาร์ทโฟนระดับท็อป ชิป A17 Pro ดีไซน์ไทเทเนียมน้ำหนักเบา พร้อมกล้องเทเลโฟโต้ 5 เท่า'
-                    },
-                    {
-                        id: 'P02',
-                        name: 'TechBook Pro M3 14-inch Space Black',
-                        categoryId: 'laptop',
-                        price: 56900,
-                        originalPrice: 59900,
-                        stock: 4,
-                        rating: 4.9,
-                        reviewsCount: 84,
-                        image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&q=80',
-                        description: 'โน้ตบุ๊กทรงพลัง ชิป M3 หน้าจอ Liquid Retina XDR รองรับงานตัดต่อและประมวลผลหนัก'
-                    },
-                    {
-                        id: 'P03',
-                        name: 'Wireless Noise Cancelling Headphones 700',
-                        categoryId: 'accessory',
-                        price: 8900,
-                        originalPrice: 11500,
-                        stock: 12,
-                        rating: 4.8,
-                        reviewsCount: 95,
-                        image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80',
-                        description: 'หูฟังไร้สายระบบตัดเสียงรบกวนขั้นสูง เสียงเบสนุ่มลึก แบตเตอรี่ยาวนาน 20 ชั่วโมง'
-                    },
-                    {
-                        id: 'P04',
-                        name: 'Smart Watch Series Ultra Titanium Case',
-                        categoryId: 'gadget',
-                        price: 14900,
-                        originalPrice: 17900,
-                        stock: 2,
-                        rating: 4.7,
-                        reviewsCount: 42,
-                        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80',
-                        description: 'นาฬิกาอัจฉริยะสำหรับกิจกรรมเอ็กซ์ตรีม ตัวเรือนไทเทเนียม ทนทาน กันน้ำลึก 100 เมตร'
-                    },
-                    {
-                        id: 'P05',
-                        name: 'Mechanical Gaming Keyboard RGB Wireless',
-                        categoryId: 'accessory',
-                        price: 3290,
-                        originalPrice: 3990,
-                        stock: 15,
-                        rating: 4.8,
-                        reviewsCount: 67,
-                        image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=500&q=80',
-                        description: 'คีย์บอร์ดกลไกไร้สาย ตอบสนองรวดเร็ว สวิตช์ทนทาน 50 ล้านครั้ง พร้อมไฟ RGB Custom'
-                    },
-                    {
-                        id: 'P06',
-                        name: 'UltraSpeed Wireless Gaming Mouse 26K DPI',
-                        categoryId: 'accessory',
-                        price: 2190,
-                        originalPrice: 2590,
-                        stock: 8,
-                        rating: 4.6,
-                        reviewsCount: 31,
-                        image: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=500&q=80',
-                        description: 'เมาส์เกมมิ่งน้ำหนักเบาเพียง 55 กรัม เซนเซอร์ความละเอียดสูงพิเศษ 26,000 DPI'
-                    }
-                ]);
-
-                // Cart States
-                const cart = ref([]);
-                const inputCoupon = ref('');
-                const appliedCoupon = ref('');
-                const couponMessage = ref('');
-                const shippingFee = ref(50);
-
-                // Checkout Form
-                const checkoutForm = ref({
-                    name: '',
-                    phone: '',
-                    address: '',
-                    paymentMethod: 'promptpay'
-                });
-
-                // Orders Tracking Mock Data
-                const orders = ref([
-                    {
-                        id: 'TZ1001',
-                        customer: { name: 'สมชาย ใจดี', phone: '081-234-5678' },
-                        total: 44950,
-                        status: 'กำลังเตรียมพัสดุ',
-                        trackingNumber: 'TH987654321'
-                    }
-                ]);
-
-                const searchOrderId = ref('');
-                const searchedOrder = ref(null);
-                const hasSearched = ref(false);
-
-                // Live Chat
-                const showChat = ref(false);
-                const newChatMessage = ref('');
-                const chatMessages = ref([
-                    { sender: 'bot', text: 'สวัสดีครับ! ยินดีต้อนรับสู่ TechZone มีอะไรให้ช่วยเหลือไหมครับ?' }
-                ]);
-
-                // Computed Properties
-                const filteredProducts = computed(() => {
-                    let list = products.value.filter(p => {
-                        const matchCat = selectedCategory.value === 'all' || p.categoryId === selectedCategory.value;
-                        const matchSearch = p.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-                                            p.description.toLowerCase().includes(searchQuery.value.toLowerCase());
+            data() {
+                return {
+                    searchQuery: '',
+                    selectedCategory: 'all',
+                    showCartDrawer: false,
+                    showCheckoutModal: false,
+                    showTrackingModal: false,
+                    discountCode: '',
+                    discountPercent: 0,
+                    searchOrderId: '',
+                    trackedResult: null,
+                    checkoutForm: { name: '', phone: '', address: '' },
+                    cart: [],
+                    products: [
+                        { id: 1, title: 'iPhone 15 Pro Max 256GB', category: 'smartphone', price: 48900, stock: 12, image: 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500&q=80' },
+                        { id: 2, title: 'MacBook Air M3 15-inch', category: 'laptop', price: 47900, stock: 4, image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&q=80' },
+                        { id: 3, title: 'Sony WH-1000XM5 Headphone', category: 'audio', price: 13900, stock: 8, image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80' },
+                        { id: 4, title: 'iPad Air 11-inch M2', category: 'smartphone', price: 23900, stock: 15, image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=500&q=80' }
+                    ]
+                }
+            },
+            computed: {
+                filteredProducts() {
+                    return this.products.filter(p => {
+                        const matchCat = this.selectedCategory === 'all' || p.category === this.selectedCategory;
+                        const matchSearch = p.title.toLowerCase().includes(this.searchQuery.toLowerCase());
                         return matchCat && matchSearch;
                     });
-
-                    if (sortBy.value === 'price-low') list.sort((a, b) => a.price - b.price);
-                    else if (sortBy.value === 'price-high') list.sort((a, b) => b.price - a.price);
-                    else if (sortBy.value === 'rating') list.sort((a, b) => b.rating - a.rating);
-
-                    return list;
-                });
-
-                const cartItemCount = computed(() => cart.value.reduce((sum, item) => sum + item.quantity, 0));
-                const cartSubtotal = computed(() => cart.value.reduce((sum, item) => sum + (item.price * item.quantity), 0));
-
-                const discountAmount = computed(() => {
-                    if (appliedCoupon.value === 'TECH10') {
-                        return cartSubtotal.value * 0.10;
-                    }
-                    return 0;
-                });
-
-                const cartGrandTotal = computed(() => {
-                    if (cart.value.length === 0) return 0;
-                    return Math.max(0, cartSubtotal.value + shippingFee.value - discountAmount.value);
-                });
-
-                // Methods
-                const toggleDarkMode = () => {
-                    isDark.value = !isDark.value;
-                    document.documentElement.classList.toggle('dark', isDark.value);
-                };
-
-                const getCategoryName = (catId) => {
-                    const c = categories.value.find(x => x.id === catId);
-                    return c ? c.name : catId;
-                };
-
-                const formatPrice = (val) => Number(val).toLocaleString('th-TH');
-
-                const resetFilters = () => {
-                    searchQuery.value = '';
-                    selectedCategory.value = 'all';
-                    sortBy.value = 'featured';
-                };
-
-                const openQuickView = (product) => {
-                    selectedQuickView.value = product;
-                };
-
-                const addToCart = (product) => {
-                    if (product.stock === 0) return;
-                    const item = cart.value.find(i => i.id === product.id);
+                },
+                cartCount() {
+                    return this.cart.reduce((sum, i) => sum + i.quantity, 0);
+                },
+                cartSubtotal() {
+                    return this.cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+                },
+                discountAmount() {
+                    return (this.cartSubtotal * this.discountPercent) / 100;
+                },
+                cartTotal() {
+                    return this.cartSubtotal - this.discountAmount;
+                }
+            },
+            mounted() {
+                // ซิงค์สินค้าจาก localStorage เผื่อแอดมินแก้ไขสินค้าใน admin.html
+                const savedProducts = JSON.parse(localStorage.getItem('techzone_products'));
+                if (savedProducts) {
+                    this.products = savedProducts;
+                }
+            },
+            methods: {
+                addToCart(product) {
+                    const item = this.cart.find(i => i.id === product.id);
                     if (item) {
-                        if (item.quantity < product.stock) item.quantity++;
+                        item.quantity++;
                     } else {
-                        cart.value.push({ ...product, quantity: 1 });
+                        this.cart.push({ ...product, quantity: 1 });
                     }
-                    showCartDrawer.value = true;
-                };
-
-                const updateCartQuantity = (item, delta) => {
-                    const target = cart.value.find(i => i.id === item.id);
-                    if (target) {
-                        target.quantity += delta;
-                        if (target.quantity <= 0) removeFromCart(item.id);
+                    this.showCartDrawer = true;
+                },
+                updateQty(item, change) {
+                    item.quantity += change;
+                    if (item.quantity <= 0) {
+                        this.removeFromCart(item.id);
                     }
-                };
-
-                const removeFromCart = (id) => {
-                    cart.value = cart.value.filter(i => i.id !== id);
-                };
-
-                const applyCouponCode = (code) => {
-                    if (code.trim().toUpperCase() === 'TECH10') {
-                        appliedCoupon.value = 'TECH10';
-                        inputCoupon.value = 'TECH10';
-                        couponMessage.value = 'ใช้โค้ด TECH10 สำเร็จ! รับส่วนลด 10%';
+                },
+                removeFromCart(id) {
+                    this.cart = this.cart.filter(i => i.id !== id);
+                },
+                applyDiscount() {
+                    if (this.discountCode.trim().toUpperCase() === 'TECH10') {
+                        this.discountPercent = 10;
+                        alert('ใช้โค้ดส่วนลด TECH10 สำเร็จ! รับส่วนลด 10%');
                     } else {
-                        couponMessage.value = 'โค้ดส่วนลดไม่ถูกต้องหรือหมดอายุ';
+                        alert('โค้ดส่วนลดไม่ถูกต้อง');
                     }
-                };
+                },
+                openCheckoutModal() {
+                    this.showCartDrawer = false;
+                    this.showCheckoutModal = true;
+                },
+                // ฟังก์ชันยืนยันการสั่งซื้อ และส่งข้อมูลออเดอร์ไป admin.html ผ่าน localStorage
+                confirmOrder() {
+                    if (!this.checkoutForm.name || !this.checkoutForm.phone) {
+                        alert('กรุณากรอกชื่อและเบอร์โทรศัพท์ก่อนทำรายการ');
+                        return;
+                    }
 
-                const goToCheckout = () => {
-                    showCartDrawer.value = false;
-                    showCheckoutModal.value = true;
-                };
-
-                const confirmOrder = () => {
-                    if (!checkoutForm.value.name || !checkoutForm.value.phone || !checkoutForm.value.address) return;
-
-                    const newId = 'TZ' + (1000 + orders.value.length + 1);
-                    const orderData = {
-                        id: newId,
-                        customer: { ...checkoutForm.value },
-                        items: [...cart.value],
-                        total: cartGrandTotal.value,
-                        status: 'กำลังเตรียมพัสดุ',
-                        trackingNumber: 'TH' + Math.floor(100000000 + Math.random() * 900000000)
+                    const newOrder = {
+                        id: '#TZ' + Math.floor(1000 + Math.random() * 9000),
+                        customer: {
+                            name: this.checkoutForm.name,
+                            phone: this.checkoutForm.phone,
+                            address: this.checkoutForm.address
+                        },
+                        items: [...this.cart],
+                        total: this.cartTotal,
+                        status: 'ชำระเงินเรียบร้อย',
+                        tracking: 'TH' + Math.floor(10000000 + Math.random() * 90000000)
                     };
 
-                    orders.value.unshift(orderData);
-                    completedOrder.value = orderData;
-                    cart.value = [];
-                    showCheckoutModal.value = false;
-                    checkoutForm.value = { name: '', phone: '', address: '', paymentMethod: 'promptpay' };
-                };
+                    // บันทึกลง localStorage Key: techzone_orders
+                    let orders = JSON.parse(localStorage.getItem('techzone_orders')) || [];
+                    orders.unshift(newOrder);
+                    localStorage.setItem('techzone_orders', JSON.stringify(orders));
 
-                const searchOrderTracking = () => {
-                    hasSearched.value = true;
-                    searchedOrder.value = orders.value.find(o => o.id.toLowerCase() === searchOrderId.value.trim().toLowerCase()) || null;
-                };
+                    alert(`สั่งซื้อสำเร็จ! รหัสคำสั่งซื้อของคุณคือ: ${newOrder.id}\nรายการออเดอร์ถูกส่งไปยังระบบหลังบ้าน (Admin Panel) เรียบร้อยแล้ว`);
 
-                const trackNewOrder = (id) => {
-                    completedOrder.value = null;
-                    searchOrderId.value = id;
-                    searchOrderTracking();
-                    showTrackingModal.value = true;
-                };
-
-                const sendChatMessage = () => {
-                    if (!newChatMessage.value.trim()) return;
-                    const text = newChatMessage.value;
-                    chatMessages.value.push({ sender: 'user', text });
-                    newChatMessage.value = '';
-
-                    setTimeout(() => {
-                        let reply = 'ขอบคุณที่ติดต่อสอบถามครับ แอดมินยินดีให้บริการครับ!';
-                        if (text.includes('โค้ด') || text.includes('ส่วนลด')) reply = 'สามารถใช้โค้ด TECH10 เพื่อรับส่วนลด 10% ได้เลยครับ';
-                        else if (text.includes('ส่ง') || text.includes('ติดตาม')) reply = 'คุณสามารถติดตามสถานะการจัดส่งได้ที่ปุ่ม "ติดตามพัสดุ" ด้านบนครับ';
-                        chatMessages.value.push({ sender: 'bot', text: reply });
-                    }, 600);
-                };
-
-                return {
-                    isDark,
-                    searchQuery,
-                    selectedCategory,
-                    sortBy,
-                    categories,
-                    products,
-                    filteredProducts,
-                    showCartDrawer,
-                    showCheckoutModal,
-                    showTrackingModal,
-                    selectedQuickView,
-                    completedOrder,
-                    cart,
-                    cartItemCount,
-                    cartSubtotal,
-                    discountAmount,
-                    cartGrandTotal,
-                    inputCoupon,
-                    appliedCoupon,
-                    couponMessage,
-                    shippingFee,
-                    checkoutForm,
-                    searchOrderId,
-                    searchedOrder,
-                    hasSearched,
-                    showChat,
-                    newChatMessage,
-                    chatMessages,
-                    toggleDarkMode,
-                    getCategoryName,
-                    formatPrice,
-                    resetFilters,
-                    openQuickView,
-                    addToCart,
-                    updateCartQuantity,
-                    removeFromCart,
-                    applyCouponCode,
-                    goToCheckout,
-                    confirmOrder,
-                    searchOrderTracking,
-                    trackNewOrder,
-                    sendChatMessage
-                };
+                    // เคลียร์ตะกร้าสินค้า
+                    this.cart = [];
+                    this.showCheckoutModal = false;
+                    this.checkoutForm = { name: '', phone: '', address: '' };
+                },
+                trackOrder() {
+                    const orders = JSON.parse(localStorage.getItem('techzone_orders')) || [];
+                    const found = orders.find(o => o.id.toLowerCase() === this.searchOrderId.trim().toLowerCase());
+                    if (found) {
+                        this.trackedResult = found;
+                    } else {
+                        alert('ไม่พบรหัสคำสั่งซื้อนี้ในระบบ');
+                        this.trackedResult = null;
+                    }
+                },
+                formatNumber(val) {
+                    return val ? val.toLocaleString() : '0';
+                }
             }
         }).mount('#app');
     </script>
