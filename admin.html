@@ -235,8 +235,13 @@
                 }
             },
             mounted() {
-                this.loadData();
-            },
+    this.loadData();
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'techzone_orders' || e.key === 'techzone_products') {
+            this.loadData();
+        }
+    });
+},
             methods: {
                 loadData() {
                     const defaultProducts = [
